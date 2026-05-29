@@ -9,6 +9,8 @@ services:
         interval: 10s
         timeout: 5s 
         retries: 5
+      volumes:
+        - "rabbitmq_data:/var/lib/rabbitmq"
   producer:
       build:
         context: .
@@ -35,3 +37,6 @@ services:
       depends_on:
         rabbitmq:
           condition: service_healthy
+
+volumes:
+  rabbitmq_data:
