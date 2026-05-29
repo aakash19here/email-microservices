@@ -13,4 +13,9 @@ rabbit_down:
 send:
 	curl -X POST localhost:8080/emails \
 	  -H "Content-Type: application/json" \
-	  -d '{"to":"a@b.com","subject":"hi","body":"hello"}'
+	  -d '{"to":"aakash19here@gmail.com","subject":"hi","body":"hello"}'
+
+run_producer:
+	go run ./cmd/producer
+run_consumer:
+	go run ./cmd/consumer

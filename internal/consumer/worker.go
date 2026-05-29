@@ -29,10 +29,18 @@ func Run(b *broker.Broker, delay time.Duration) error {
 		}
 
 		log.Printf("sending email %s to %s ...", e.ID, e.To)
-		time.Sleep(delay) // artificial delay simulating SMTP send
+
+		if err := e.Send(e.Body, e.To); err != nil {
+			log.Printf("failed to send email %s: %v", e.ID, err)
+
+			_ = d.Nack(false, true) // requeue so we can retry
+
+			continue
+		}
+
 		log.Printf("sent email %s", e.ID)
 
-		_ = d.Ack(false) // ack only after the send "succeeds"
+		_ = d.Ack(false) // ack only after the send succeeds
 	}
 
 	return nil

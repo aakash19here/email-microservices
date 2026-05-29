@@ -3,8 +3,12 @@ package email
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strings"
 	"time"
+
+	"github.com/aakash19here/email-microservices/internal/config"
+	"github.com/resend/resend-go/v3"
 )
 
 type Email struct {
@@ -37,4 +41,20 @@ func Unmarshal(b []byte) (Email, error) {
 	err := json.Unmarshal(b, &e)
 
 	return e, err
+}
+
+func (e *Email) Send(body, to string) error {
+	cfg := config.Load()
+	client := resend.NewClient(cfg.ResendKey)
+
+	params := &resend.SendEmailRequest{
+		From:    fmt.Sprintf("Acme <%s>", cfg.From),
+		To:      []string{to},
+		Html:    fmt.Sprintf("<strong>%s</strong>", body),
+		Subject: "Hello from Golang",
+	}
+
+	_, err := client.Emails.Send(params)
+
+	return err
 }
