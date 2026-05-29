@@ -1,0 +1,37 @@
+services: 
+  rabbitmq:
+      image: rabbitmq:3.13-management
+      ports:
+        - "5672:5672" #amqp
+        - "15672:15672"   # management UI -> http://localhost:15672 (guest/guest)
+      healthcheck:
+        test: ["CMD", "rabbitmq-diagnostics", "ping"]
+        interval: 10s
+        timeout: 5s 
+        retries: 5
+  producer:
+      build:
+        context: .
+        args:
+          SERVICE: producer
+      ports:
+        - "8080:8080"
+      environment:
+        RABBITMQ_URL: "amqp://guest:guess@rabbitmq:5672" #advanced message queue protocol - amqp
+        QUEUE_NAME: emails
+        HTTP_PORT: "8080"
+      depends_on:
+        rabbitmq:
+          condition: service_healthy
+  consumer:
+      build:
+        context: .
+        args:
+          SERVICE: consumer
+      environment: 
+        RABBITMQ_URL: "amqp://guest:guess@rabbitmq:5672"
+        QUEUE_NAME: emails
+        SEND_DELAY: 3s
+      depends_on:
+        rabbitmq:
+          condition: service_healthy
